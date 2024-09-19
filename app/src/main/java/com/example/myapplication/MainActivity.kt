@@ -70,7 +70,7 @@ fun App(){
 @Composable
 fun Bio(){
     Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp).padding(vertical=2.dp)) {
-        Text(text = "kaixo esto es una prueba no se que escrbir, vale gracias un saludo", fontSize = 20.sp, textAlign = TextAlign.Center)
+        Text(text = "Kaixo Ibai naiz, 19 urte ditut, bideojokoak asko gustatzen zaizkit eta musika asko gustatzen zait", fontSize = 20.sp, textAlign = TextAlign.Center)
     }
 }
 
