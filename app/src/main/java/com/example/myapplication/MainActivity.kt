@@ -1,7 +1,9 @@
 package com.example.myapplication
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -20,14 +22,31 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Share
+import androidx.compose.material3.BottomAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FabPosition
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.TopAppBar
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -41,12 +60,99 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
            App()
+            ViewContainer()
             }
         }
     }
 
 
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
+@Preview
+@Composable
+fun ViewContainer(){
+    Scaffold(
+        topBar = { ToolBar()},
+        content = { paddingValues -> // Contenido que puede desplazarse
+            Column(
+                modifier = Modifier
+                    .padding(paddingValues) // Respeta las barras superior e inferior
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState()) // Habilita el scroll vertical
+            ) {
+                App() // El contenido de tu aplicación
+            }
+        },
+        floatingActionButton={ FAB() },
+        floatingActionButtonPosition = FabPosition.End,
+        bottomBar = { BottomAppBar() }
+    )
+}
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ToolBar(){
+    val context= LocalContext.current
+
+    TopAppBar(
+        title = { Text(text = "Ibai Gonzalez Portfolio") },
+        Modifier.background(colorResource(id = R.color.teal_200)),
+        actions = {
+            IconButton(onClick = {  val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                type = "text/plain"
+                putExtra(Intent.EXTRA_TEXT, "https://www.ejemplo.com")
+            }
+                // Mostrar el selector para compartir
+                context.startActivity(Intent.createChooser(shareIntent, "Compartir enlace"))
+            }
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Share,
+                    contentDescription = "Localized description"
+                )
+            }
+        },
+
+
+    )
+
+
+}
+
+
+@Composable
+fun BottomAppBar() {
+    val context = LocalContext.current
+
+    BottomAppBar(
+        modifier = Modifier.height(90.dp).background(color = Color.Gray),
+
+        contentColor = Color.Black,
+    ) {
+        Spacer(modifier = Modifier.weight(1f))
+
+        IconButton(onClick = {
+            val emailIntent = Intent(Intent.ACTION_SENDTO).apply {
+                data = Uri.parse("mailto:")
+                putExtra(Intent.EXTRA_EMAIL, arrayOf("destinatario@ejemplo.com"))
+            }
+        }) {
+            Icon(
+                imageVector = Icons.Filled.Email,
+                contentDescription = "Enviar correo"
+            )
+        }
+    }
+}
+@Composable
+fun FAB(){
+    val context= LocalContext.current
+    FloatingActionButton(onClick = {Toast.makeText(context, "Email", Toast.LENGTH_SHORT).show() })
+    {
+       Text("+")
+    }
+
+
+}
 
 @Composable
 fun App(){
@@ -162,11 +268,9 @@ fun Rrss(){
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun RssPreview(){
-    Rrss()
-}
+
+
+
 @Composable
 @Preview
 fun AppPreview(){
@@ -174,7 +278,11 @@ fun AppPreview(){
     Bio()
     AboutMe()
     Rrss()
+    FAB()
+    BottomAppBar()
 }
+
+
 
 
 
