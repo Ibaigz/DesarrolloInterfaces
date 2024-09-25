@@ -32,8 +32,12 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -41,7 +45,10 @@ import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -51,7 +58,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
 import com.example.myapplication.ui.theme.MyApplicationTheme
+import kotlinx.coroutines.launch
 
 
 class MainActivity : ComponentActivity() {
@@ -66,83 +80,127 @@ class MainActivity : ComponentActivity() {
     }
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-@Preview
 @Composable
-fun ViewContainer(){
+fun ViewContainer() {
+    val navController = rememberNavController()
+    val navBackStackEntry = navController.currentBackStackEntryAsState()
+    val currentDestination = navBackStackEntry.value?.destination?.route
+
+    // Define a title based on the current destination
+    val title = when (currentDestination) {
+        "home" -> "Ibai Gonzalez Portfolio"
+        "info" -> "Info"
+        "gallery" -> "Gallery"
+        "settings" -> "Settings"
+        else -> "Ibai Gonzalez Portfolio" // Default title
+    }
+
     Scaffold(
-        topBar = { ToolBar()},
-        content = { paddingValues -> // Contenido que puede desplazarse
+        topBar = { ToolBar(title) }, // Pass the dynamic title
+        content = { paddingValues ->
             Column(
                 modifier = Modifier
-                    .padding(paddingValues) // Respeta las barras superior e inferior
+                    .padding(paddingValues)
                     .fillMaxSize()
-                    .verticalScroll(rememberScrollState()) // Habilita el scroll vertical
+                    .verticalScroll(rememberScrollState())
             ) {
-                App() // El contenido de tu aplicación
+                // Integrating MainScreen's NavHost
+                NavHost(navController = navController, startDestination = "home") {
+                    composable("home") { HomeScreen(navController) }
+                    composable("info") { InfoScreen(navController) }
+                    composable("gallery") { GalleryScreen(navController) }
+                    composable("settings") { SettingsScreen(navController) }
+                }
             }
         },
-        floatingActionButton={ FAB() },
+        floatingActionButton = { FAB() },
         floatingActionButtonPosition = FabPosition.End,
-        bottomBar = { BottomAppBar() }
+        bottomBar = { BottomNavBar(navController) }
     )
 }
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ToolBar(){
-    val context= LocalContext.current
+fun ToolBar(title: String) {
+    val context = LocalContext.current
 
     TopAppBar(
-        title = { Text(text = "Ibai Gonzalez Portfolio") },
-        Modifier.background(colorResource(id = R.color.teal_200)),
+        title = { Text(text = title) },
+        modifier = Modifier.background(colorResource(id = R.color.teal_200)),
         actions = {
-            IconButton(onClick = {  val shareIntent = Intent(Intent.ACTION_SEND).apply {
-                type = "text/plain"
-                putExtra(Intent.EXTRA_TEXT, "https://www.ejemplo.com")
-            }
-                // Mostrar el selector para compartir
+            IconButton(onClick = {
+                val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                    type = "text/plain"
+                    putExtra(Intent.EXTRA_TEXT, "https://www.ejemplo.com")
+                }
+                // Show the share chooser
                 context.startActivity(Intent.createChooser(shareIntent, "Compartir enlace"))
-            }
-            ) {
+            }) {
                 Icon(
                     imageVector = Icons.Filled.Share,
-                    contentDescription = "Localized description"
+                    contentDescription = "Share"
                 )
             }
         },
-
-
     )
-
-
 }
 
 
 @Composable
-fun BottomAppBar() {
-    val context = LocalContext.current
-
-    BottomAppBar(
-        modifier = Modifier.height(90.dp).background(color = Color.Gray),
-
-        contentColor = Color.Black,
-    ) {
-        Spacer(modifier = Modifier.weight(1f))
-
-        IconButton(onClick = {
-            val emailIntent = Intent(Intent.ACTION_SENDTO).apply {
-                data = Uri.parse("mailto:")
-                putExtra(Intent.EXTRA_EMAIL, arrayOf("destinatario@ejemplo.com"))
+fun BottomNavBar(navController: NavHostController) {
+    NavigationBar {
+        NavigationBarItem(
+            icon = { Icon(Icons.Default.Home, contentDescription = "Home") },
+            selected = navController.currentBackStackEntry?.destination?.route == "home",
+            onClick = {
+                navController.navigate("home") {
+                    popUpTo(navController.graph.startDestinationId) { saveState = true }
+                    launchSingleTop = true
+                    restoreState = true
+                }
             }
-        }) {
-            Icon(
-                imageVector = Icons.Filled.Email,
-                contentDescription = "Enviar correo"
-            )
-        }
+        )
+        NavigationBarItem(
+            icon = { Icon(Icons.Default.Info, contentDescription = "Info") },
+            selected = navController.currentBackStackEntry?.destination?.route == "info",
+            onClick = {
+                navController.navigate("info") {
+                    popUpTo(navController.graph.startDestinationId) { saveState = true }
+                    launchSingleTop = true
+                    restoreState = true
+                }
+            }
+        )
+        NavigationBarItem(
+            icon = { Icon(Icons.Default.Edit, contentDescription = "Gallery") },
+            selected = navController.currentBackStackEntry?.destination?.route == "gallery",
+            onClick = {
+                navController.navigate("gallery") {
+                    popUpTo(navController.graph.startDestinationId) { saveState = true }
+                    launchSingleTop = true
+                    restoreState = true
+                }
+            }
+        )
+        NavigationBarItem(
+            icon = { Icon(Icons.Default.Settings, contentDescription = "Settings") },
+            selected = navController.currentBackStackEntry?.destination?.route == "settings",
+            onClick = {
+                navController.navigate("settings") {
+                    popUpTo(navController.graph.startDestinationId) { saveState = true }
+                    launchSingleTop = true
+                    restoreState = true
+                }
+            }
+        )
     }
 }
+
+
+
 @Composable
 fun FAB(){
     val context= LocalContext.current
@@ -243,6 +301,23 @@ fun AboutMe(){
 }
 
 @Composable
+fun HomeScreen(navController: NavController) {
+
+    App()
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun GalleryScreen(navController: NavController) {
+
+}
+
+@Composable
+fun SettingsScreen(navController: NavController) {
+    // Settings pantailaren edukia
+}
+
+@Composable
 fun Rrss(){
     val context = LocalContext.current
     Row (modifier = Modifier.padding(vertical = 30.dp), horizontalArrangement = Arrangement.spacedBy(40.dp)) {
@@ -279,7 +354,6 @@ fun AppPreview(){
     AboutMe()
     Rrss()
     FAB()
-    BottomAppBar()
 }
 
 
