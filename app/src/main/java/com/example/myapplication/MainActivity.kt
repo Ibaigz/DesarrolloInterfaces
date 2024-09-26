@@ -1,4 +1,5 @@
 package com.example.myapplication
+
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.net.Uri
@@ -28,6 +29,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
@@ -58,6 +60,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -73,11 +77,11 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-           App()
+            App()
             ViewContainer()
-            }
         }
     }
+}
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -97,22 +101,18 @@ fun ViewContainer() {
         else -> "Ibai Gonzalez Portfolio" // Default title
     }
 
+    val viewModel: GalleryViewModel = viewModel()
+
     Scaffold(
         topBar = { ToolBar(title) }, // Pass the dynamic title
-        content = { paddingValues ->
-            Column(
-                modifier = Modifier
-                    .padding(paddingValues)
-                    .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
-            ) {
-                // Integrating MainScreen's NavHost
-                NavHost(navController = navController, startDestination = "home") {
-                    composable("home") { HomeScreen(navController) }
-                    composable("info") { InfoScreen(navController) }
-                    composable("gallery") { GalleryScreen(navController) }
-                    composable("settings") { SettingsScreen(navController) }
-                }
+        content = {
+
+            // Integrating MainScreen's NavHost
+            NavHost(navController = navController, startDestination = "home") {
+                composable("home") { HomeScreen(navController) }
+                composable("info") { InfoScreen(navController) }
+                composable("gallery") { GalleryScreen(navController, viewModel) }
+                composable("settings") { SettingsScreen(navController) }
             }
         },
         floatingActionButton = { FAB() },
@@ -200,103 +200,149 @@ fun BottomNavBar(navController: NavHostController) {
 }
 
 
-
 @Composable
-fun FAB(){
-    val context= LocalContext.current
-    FloatingActionButton(onClick = {Toast.makeText(context, "Email", Toast.LENGTH_SHORT).show() })
+fun FAB() {
+    val context = LocalContext.current
+    FloatingActionButton(onClick = { Toast.makeText(context, "Email", Toast.LENGTH_SHORT).show() })
     {
-       Text("+")
+        Text("+")
     }
 
 
 }
 
 @Composable
-fun App(){
-    Column(modifier = Modifier.fillMaxSize().padding(vertical = 30.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-        Image(painter= painterResource(id= R.drawable.man_person_icon) , contentDescription="Logo", modifier = Modifier.size(240.dp).clip(
-            CircleShape).border(2.dp, Color.Black, CircleShape))
+fun App() {
+    ViewContainer()
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(vertical = 120.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        item {
+            Image(
+                painter = painterResource(id = R.drawable.man_person_icon),
+                contentDescription = "Logo",
+                modifier = Modifier
+                    .size(240.dp)
+                    .clip(
+                        CircleShape
+                    )
+                    .border(2.dp, Color.Black, CircleShape)
+            )
 
-        Row(modifier = Modifier.padding(vertical = 10.dp), horizontalArrangement = Arrangement.Center ){
-            Text(text = "Ibai González", fontSize = 40.sp,)
+            Row(
+                modifier = Modifier.padding(vertical = 10.dp),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Text(text = "Ibai González", fontSize = 40.sp)
+
+            }
+
+            Bio()
+            AboutMe()
+            Rrss()
 
         }
-
-        Bio()
-        AboutMe()
-        Rrss()
 
     }
 
 }
 
 @Composable
-fun Bio(){
-    Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp).padding(vertical=2.dp)) {
-        Text(text = "Kaixo Ibai naiz, 19 urte ditut, bideojokoak asko gustatzen zaizkit eta musika asko gustatzen zait", fontSize = 20.sp, textAlign = TextAlign.Center)
+fun Bio() {
+    Row(modifier = Modifier
+        .fillMaxWidth()
+        .padding(horizontal = 20.dp)
+        .padding(vertical = 2.dp)) {
+        Text(
+            text = "Kaixo Ibai naiz, 19 urte ditut, bideojokoak asko gustatzen zaizkit eta musika asko gustatzen zait",
+            fontSize = 20.sp,
+            textAlign = TextAlign.Center
+        )
     }
 }
 
 @Composable
-fun AboutMe(){
-    Column (modifier = Modifier.padding(vertical = 20.dp)) {
-    Column (modifier = Modifier.padding(vertical = 15.dp)) {
-        Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp)) {
-            Image(
-                painter = painterResource(id = R.drawable.baseline_school_24),
-                contentDescription = "Icono Colegio",
-                modifier = Modifier.size(40.dp).padding(horizontal = 1.dp)
-            )
+fun AboutMe() {
+    Column(modifier = Modifier.padding(vertical = 20.dp)) {
+        Column(modifier = Modifier.padding(vertical = 15.dp)) {
+            Row(modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp)) {
+                Image(
+                    painter = painterResource(id = R.drawable.baseline_school_24),
+                    contentDescription = "Icono Colegio",
+                    modifier = Modifier
+                        .size(40.dp)
+                        .padding(horizontal = 1.dp)
+                )
 
 
-            Column {
-                Text(text = "Education", fontSize = 20.sp,)
-                Text(text = "Frontend Dev")
+                Column {
+                    Text(text = "Education", fontSize = 20.sp)
+                    Text(text = "Frontend Dev")
+                }
             }
         }
-    }
-    Column (modifier = Modifier.padding(vertical = 15.dp)) {
-        Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp)) {
-            Image(
-                painter = painterResource(id = R.drawable.baseline_school_24),
-                contentDescription = "Icono Colegio",
-                modifier = Modifier.size(40.dp).padding(horizontal = 1.dp)
-            )
+        Column(modifier = Modifier.padding(vertical = 15.dp)) {
+            Row(modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp)) {
+                Image(
+                    painter = painterResource(id = R.drawable.baseline_school_24),
+                    contentDescription = "Icono Colegio",
+                    modifier = Modifier
+                        .size(40.dp)
+                        .padding(horizontal = 1.dp)
+                )
 
 
-            Column {
-                Text(text = "Sport", fontSize = 20.sp,)
-                Text(text = "Sleep")
+                Column {
+                    Text(text = "Sport", fontSize = 20.sp)
+                    Text(text = "Sleep")
+                }
             }
         }
-    }
-    Column (modifier = Modifier.padding(vertical = 15.dp)) {
-    Row (modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp)) {
-        Image(painter = painterResource(id = R.drawable.baseline_school_24), contentDescription = "Icono Colegio", modifier = Modifier.size(40.dp).padding(horizontal = 1.dp))
+        Column(modifier = Modifier.padding(vertical = 15.dp)) {
+            Row(modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp)) {
+                Image(
+                    painter = painterResource(id = R.drawable.baseline_school_24),
+                    contentDescription = "Icono Colegio",
+                    modifier = Modifier
+                        .size(40.dp)
+                        .padding(horizontal = 1.dp)
+                )
 
 
-        Column {
-            Text(text="Fav Food", fontSize = 20.sp,)
-            Text(text="Grandma's")
-        }
-    }
-    }
-    Column (modifier = Modifier.padding(vertical = 15.dp)) {
-        Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp)) {
-            Image(
-                painter = painterResource(id = R.drawable.baseline_school_24),
-                contentDescription = "Icono Colegio",
-                modifier = Modifier.size(40.dp).padding(horizontal = 1.dp)
-            )
-
-
-            Column {
-                Text(text = "Hobby", fontSize = 20.sp,)
-                Text(text = "Djing")
+                Column {
+                    Text(text = "Fav Food", fontSize = 20.sp)
+                    Text(text = "Grandma's")
+                }
             }
         }
-    }
+        Column(modifier = Modifier.padding(vertical = 15.dp)) {
+            Row(modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp)) {
+                Image(
+                    painter = painterResource(id = R.drawable.baseline_school_24),
+                    contentDescription = "Icono Colegio",
+                    modifier = Modifier
+                        .size(40.dp)
+                        .padding(horizontal = 1.dp)
+                )
+
+
+                Column {
+                    Text(text = "Hobby", fontSize = 20.sp)
+                    Text(text = "Djing")
+                }
+            }
+        }
     }
 }
 
@@ -306,11 +352,6 @@ fun HomeScreen(navController: NavController) {
     App()
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun GalleryScreen(navController: NavController) {
-
-}
 
 @Composable
 fun SettingsScreen(navController: NavController) {
@@ -318,22 +359,36 @@ fun SettingsScreen(navController: NavController) {
 }
 
 @Composable
-fun Rrss(){
+fun Rrss() {
     val context = LocalContext.current
-    Row (modifier = Modifier.padding(vertical = 30.dp), horizontalArrangement = Arrangement.spacedBy(40.dp)) {
+    Row(
+        modifier = Modifier.padding(vertical = 30.dp),
+        horizontalArrangement = Arrangement.spacedBy(40.dp)
+    ) {
         Image(
             painter = painterResource(id = R.drawable.github_seeklogo),
             contentDescription = "Icono colegio",
-            modifier = Modifier.size(40.dp).clickable
-            {val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/Ibaigz"))
-                context.startActivity(intent) }
+            modifier = Modifier
+                .size(40.dp)
+                .clickable
+                {
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/Ibaigz"))
+                    context.startActivity(intent)
+                }
         )
         Image(
             painter = painterResource(id = R.drawable.linkedin_seeklogo),
             contentDescription = "Icono colegio",
-            modifier = Modifier.size(40.dp).clickable
-            {val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://www.linkedin.com/in/ibai-gonzalez-molina-776432257/"))
-                context.startActivity(intent) }
+            modifier = Modifier
+                .size(40.dp)
+                .clickable
+                {
+                    val intent = Intent(
+                        Intent.ACTION_VIEW,
+                        Uri.parse("https://www.linkedin.com/in/ibai-gonzalez-molina-776432257/")
+                    )
+                    context.startActivity(intent)
+                }
         )
         Image(
             painter = painterResource(id = R.drawable.instagram_simple_icon),
@@ -344,11 +399,9 @@ fun Rrss(){
 }
 
 
-
-
 @Composable
 @Preview
-fun AppPreview(){
+fun AppPreview() {
     App()
     Bio()
     AboutMe()
