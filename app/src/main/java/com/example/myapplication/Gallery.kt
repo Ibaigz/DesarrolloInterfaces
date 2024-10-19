@@ -128,7 +128,7 @@ fun ArtworkCard(artwork: Artwork) {
                     fontSize = 18.sp,
                     modifier = Modifier
                         .padding(8.dp) // Izenburuaren inguruko padding-a
-                    , color = Color.White // Testuaren kolorea
+                    , color = MaterialTheme.colorScheme.primary
                 )
             }
 

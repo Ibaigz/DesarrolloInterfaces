@@ -47,6 +47,8 @@ import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.TopAppBar
@@ -68,7 +70,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.example.myapplication.ui.theme.MyApplicationTheme
+import com.example.compose.AppTheme
 import kotlinx.coroutines.launch
 
 
@@ -77,8 +79,10 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            App()
-            ViewContainer()
+            AppTheme {
+                ViewContainer()
+            }
+
         }
     }
 }
@@ -129,7 +133,7 @@ fun ToolBar(title: String) {
 
     TopAppBar(
         title = { Text(text = title) },
-        modifier = Modifier.background(colorResource(id = R.color.teal_200)),
+        modifier = Modifier.background(MaterialTheme.colorScheme.primary) ,
         actions = {
             IconButton(onClick = {
                 val shareIntent = Intent(Intent.ACTION_SEND).apply {
@@ -349,7 +353,7 @@ fun AboutMe() {
 @Composable
 fun HomeScreen(navController: NavController) {
 
-    App()
+
 }
 
 
