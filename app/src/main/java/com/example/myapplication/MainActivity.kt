@@ -15,13 +15,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -71,7 +71,10 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.compose.AppTheme
+import contadorScreen
 import kotlinx.coroutines.launch
+import androidx.compose.ui.Modifier
+import ejercicioScreen
 
 
 class MainActivity : ComponentActivity() {
@@ -80,7 +83,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             AppTheme {
-                ViewContainer()
+                ViewContainer(innerPadding = PaddingValues())
             }
 
         }
@@ -91,7 +94,7 @@ class MainActivity : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun ViewContainer() {
+fun ViewContainer(innerPadding: PaddingValues) {
     val navController = rememberNavController()
     val navBackStackEntry = navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry.value?.destination?.route
@@ -112,16 +115,16 @@ fun ViewContainer() {
         content = {
 
             // Integrating MainScreen's NavHost
-            NavHost(navController = navController, startDestination = "home") {
-                composable("home") { HomeScreen(navController) }
+            NavHost(navController = navController, startDestination = "home",modifier = Modifier.padding(innerPadding)) {
+                composable("home") { ejercicioScreen(navController) }
                 composable("info") { InfoScreen(navController) }
                 composable("gallery") { GalleryScreen(navController, viewModel) }
                 composable("settings") { SettingsScreen(navController) }
             }
         },
-        floatingActionButton = { FAB() },
+        //floatingActionButton = { FAB() },
         floatingActionButtonPosition = FabPosition.End,
-        bottomBar = { BottomNavBar(navController) }
+        //bottomBar = { BottomNavBar(navController) }
     )
 }
 
@@ -217,7 +220,7 @@ fun FAB() {
 
 @Composable
 fun App() {
-    ViewContainer()
+    ViewContainer(innerPadding = PaddingValues())
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
